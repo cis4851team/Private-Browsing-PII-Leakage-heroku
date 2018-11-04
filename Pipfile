@@ -4,7 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
+flask-heroku = "*"
+future = "*"
+gunicorn = "*"
+itsdangerous = "*"
+"psycopg2" = "*"
+selenium = "*"
+Flask = "*"
+Flask-SQLAlchemy = "*"
+"Jinja2" = "*"
+MarkupSafe = "*"
+SQLAlchemy = "*"
+Werkzeug = "*"
 
 [dev-packages]
 

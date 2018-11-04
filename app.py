@@ -41,7 +41,17 @@ def pii():
             session['address'] = ad
             session['email'] = em
             session['dob'] = b
-    return 'PII submitted! To enter more data, <a href="{}">click here!</a>'.format(url_for('return_to_index'))
+
+        return 'PII submitted! To enter more data, <a href="{}">click here!</a>'.format(url_for('return_to_index'))
+    else:
+        first_name = session['first_name'] if 'first_name' in session else ""
+        last_name = session['last_name'] if 'last_name' in session else ""
+        address = session['address'] if 'address' in session else ""
+        email = session['email'] if 'email' in session else ""
+        dob = session['dob'] if 'dob' in session else ""
+        return render_template(
+            'index.html', first_name=first_name, last_name=last_name, address=address,
+            email=email, dob=dob)
 
 
 @app.route('/')

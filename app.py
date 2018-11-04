@@ -21,6 +21,7 @@ def pii():
 
         user = User(first_name, last_name, address, email, dob)
         log_user = user.__dict__.copy()
+        del log_user["_sa_instance_state"]
 
         try:
             db.session.add(user)

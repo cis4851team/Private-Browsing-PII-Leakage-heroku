@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 import sys
 import json
@@ -10,7 +10,8 @@ app.secret_key = 'CIS 4851'
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 
-@app.route('/', methods=["POST", "GET"]) 
+
+@app.route('/', methods=["POST", "GET"])
 def pii():
     if request.method == "POST":
         fn = request.form['first_name']
@@ -19,44 +20,47 @@ def pii():
         em = request.form['email']
         b = request.form['dob']
 
-        user = User(fn, ln, ad, em, b)
+        user = FormData(fn, ln, ad, em, b)
         log_user = user.__dict__.copy()
         del log_user["_sa_instance_state"]
 
         try:
             db.session.add(user)
             db.session.commit()
-            session['first_name'] = fn
-            session['last_name'] = ln
-            session['address'] = ad
-            session['email'] = em
-            session['dob'] = b
-        except Exception as e:
-            print("\n FAILED entry: {}\n".format(json.dumps(log_user)))
-            print(e)
-            sys.stdout.flush()
             session['first_name'] = ""
             session['last_name'] = ""
             session['address'] = ""
             session['email'] = ""
             session['dob'] = ""
-        return render_template(
-            'index.html', first_name=session["first_name"], last_name=session["last_name"], 
-            address=session["address"], email=session["email"], 
-            dob=session["dob"])
+        except Exception as e:
+            print("\n FAILED entry: {}\n".format(json.dumps(log_user)))
+            print(e)
+            sys.stdout.flush()
+            session['first_name'] = fn
+            session['last_name'] = ln
+            session['address'] = ad
+            session['email'] = em
+            session['dob'] = b
+
+        return 'PII submitted! To enter more data, <a href="{}">click here!</a>'.format(url_for('return_to_index'))
     else:
-        first_name = session['first_name'] if 'first_name' in session else ""
-        last_name = session['last_name'] if 'last_name' in session else ""
-        address = session['address'] if 'address' in session else ""
-        email = session['email'] if 'email' in session else ""
-        dob = session['dob'] if 'dob' in session else ""
-        return render_template(
-            'index.html', first_name=first_name, last_name=last_name, address=address,
-            email=email, dob=dob)
+        fn = session['first_name'] if 'first_name' in session else ""
+        ln = session['last_name'] if 'last_name' in session else ""
+        ad = session['address'] if 'address' in session else ""
+        em = session['email'] if 'email' in session else ""
+        b = session['dob'] if 'dob' in session else ""
 
 
-class User(db.Model):
-    __tablename__ = "user"
+@app.route("/")
+def return_to_index():
+    return render_template(
+        'index.html', first_name=session["first_name"], last_name=session["last_name"],
+        address=session["address"], email=session["email"],
+        dob=session["dob"])
+
+
+class FormData(db.Model):
+    __tablename__ = "form_data"
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.Text())
     last_name = db.Column(db.Text())

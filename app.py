@@ -6,35 +6,40 @@ from flask_heroku import Heroku
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['secret_key'] = 'CIS 4851'
+app.secret_key = 'CIS 4851'
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 
 @app.route('/', methods=["POST", "GET"]) 
 def pii():
     if request.method == "POST":
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        address = request.form['address']
-        email = request.form['email']
-        dob = request.form['dob']
+        fn = request.form['first_name']
+        ln = request.form['last_name']
+        ad = request.form['address']
+        em = request.form['email']
+        b = request.form['dob']
 
-        user = User(first_name, last_name, address, email, dob)
+        user = User(fn, ln, ad, em, b)
         log_user = user.__dict__.copy()
         del log_user["_sa_instance_state"]
 
         try:
             db.session.add(user)
             db.session.commit()
-            session['first_name'] = request.form['first_name']
-            session['last_name'] = request.form['last_name']
-            session['address'] = request.form['address']
-            session['email'] = request.form['email']
-            session['dob'] = request.form['dob']
+            session['first_name'] = fn
+            session['last_name'] = ln
+            session['address'] = ad
+            session['email'] = em
+            session['dob'] = b
         except Exception as e:
             print("\n FAILED entry: {}\n".format(json.dumps(log_user)))
             print(e)
             sys.stdout.flush()
+            session['first_name'] = ""
+            session['last_name'] = ""
+            session['address'] = ""
+            session['email'] = ""
+            session['dob'] = ""
         return render_template(
             'index.html', first_name=session["first_name"], last_name=session["last_name"], 
             address=session["address"], email=session["email"], 
